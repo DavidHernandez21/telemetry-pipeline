@@ -61,7 +61,7 @@ api:
 ```
 
 ```shell
-docker exec -it vector vector tap --inputs-of openobserve_prometheus | tee vector-metrics-input-to-sink.json
+docker exec -it vector vector tap --inputs-of vector_aggregator_metrics | tee vector-metrics-input-to-sink.json
 ```
 
 ## generate self-signed certificate
