@@ -70,3 +70,9 @@ cfssl genkey -initca csr.json | cfssljson -bare ca
 cfssl gencert -ca ca.pem -ca-key ca-key.pem csr.json | cfssljson -bare cert
 
 ```
+
+## Bonus
+
+### Collect and send telemetry using Opentelemetry collector
+
+Although not mentioned in the diagrams, the pipeline uses [Opentelemetry collector](https://opentelemetry.io/docs/collector/) to collect telemetry data from the different services and send it directly to the sinks, in this case only Openobserve but in can be easily configured to push data to other sinks. **Caveats** Some receivers do not work properly on WSL2, also metrics names are not "compatible" with many of the published Grafana dashboards.
