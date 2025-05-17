@@ -1,0 +1,115 @@
+---
+api:
+  enabled: true
+  address: 0.0.0.0:8686
+
+sources:
+
+  journalid:
+    type: journald
+    current_boot_only: true
+    extra_args:
+      - --dmesg
+
+
+  docker_logs:
+    type: docker_logs
+    multiline:
+      start_pattern: "^\\[?[0-9]{4}-[0-9]{2}-[0-9]{2}"
+      mode: halt_before
+      condition_pattern: "^\\[?[0-9]{4}-[0-9]{2}-[0-9]{2}"
+      timeout_ms: 2000
+    exclude_containers:
+      - docker-gc.reboot
+  # metrics are incomplete, at least with respect to node_exporter
+  # maybe I need to tweak the collectors or other settings
+  # host_metrics:
+  #   type: host_metrics
+  #   collectors:
+  #     - cgroups
+  #   namespace: host
+  #   scrape_interval_secs: 15
+  node-exporter:
+    type: prometheus_scrape
+    endpoints:
+      - http://node-exporter:9100/metrics
+    scrape_interval_secs: 15
+    instance_tag: "job"
+    endpoint_tag: "local-instance"
+  rabbitmq:
+    type: prometheus_scrape
+    endpoints:
+      - http://rabbitmq:15692/metrics
+    scrape_interval_secs: 10
+  # percona_mongodb_exporter:
+  #   type: prometheus_scrape
+  #   endpoints:
+  #     - http://percona-mongo-exporter:9216/metrics
+  #   scrape_interval_secs: 30
+  #   instance_tag: "local-instance"
+  #   endpoint_tag: "hostname"
+  # mongodb:
+  #   type: mongodb_metrics
+  #   endpoints:
+  #     - mongodb://mongodb:27017/admin?ssl=false
+    # scrape_interval_secs: 30
+transforms:
+  filter_docker_logs:
+    type: filter
+    inputs:
+      - docker_logs
+    condition:
+      type: vrl
+      ## do not send logs with level 'info' or 'debug'
+      source: |-
+        match(string!(.message), r'(?i)error|warning|traceback') && !match(string!(.message), r'(?i)\s+?\[?(info|debug)\]?\s+?') && !match(string!(.message), r'(?i)level[= ]+?(info|debug)')
+
+  filter_journalid:
+    type: filter
+    inputs:
+      - journalid
+    condition:
+      type: vrl
+      # match(string!(.message), r'(?i)Out of memory: Killed process')
+      source: |-
+        match(string!(.message), r'(?i)left promiscuous mode')
+
+  replace_host_for_docker_logs:
+    type: remap
+    inputs:
+      - filter_docker_logs
+    source: |-
+      .host = "127.0.0.1"
+  # add_instance_monogdb_exporter:
+  #   type: remap
+  #   inputs:
+  #     - percona_mongodb_exporter
+  #   # {"name":"mongodb_ss_logicalSessionRecordCache_sessionsCollectionJobCount","tags":{"cl_id":"","cl_role":"","instance":"127.0.0.1:9216","nodename":"http://127.0.0.1:9216/metrics","rs_state":"0"},"timestamp":"2024-07-01T07:18:05.857394864Z","kind":"absolute","counter":{"value":2.0}}
+  #   # add nodename to the tags using vrl
+  #   # no need to parse the json, it is already parsed
+  #   source: |-
+  #     .tags.instance = "127.0.0.1:9216"
+
+  add-instance_node_exporter:
+    type: remap
+    inputs:
+      - node-exporter
+    source: |-
+      .tags.instance = "127.0.0.1:9100"
+
+
+sinks:
+  vector_aggregator_metrics:
+    type: vector
+    inputs:
+      - rabbitmq
+      - add-instance_node_exporter
+
+    address: nginx:6000
+
+  vector_aggregator_logs:
+    type: vector
+    inputs:
+      - replace_host_for_docker_logs
+      - filter_journalid
+    address: nginx:6001

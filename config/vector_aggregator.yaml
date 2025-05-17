@@ -1,0 +1,39 @@
+---
+api:
+  enabled: true
+  address: 0.0.0.0:8687
+
+sources:
+
+  vector_agent_logs:
+    type: vector
+    address: 0.0.0.0:6001
+
+  vector_agent_metrics:
+    type: vector
+    address: 0.0.0.0:6000
+
+sinks:
+  openobserve_http:
+    type: http
+    inputs:
+      - vector_agent_logs
+    uri: http://openobserve:5080/openobserve/api/dajetutta/vector/_json
+    method: post
+    auth:
+      strategy: basic
+      user: "${ZO_ROOT_USER}"
+      password: "${ZO_ROOT_USER_PASSWORD}"
+    compression: gzip
+    encoding:
+      codec: json
+      timestamp_format: rfc3339
+    healthcheck:
+      enabled: false
+  victoriametrics_prometheus:
+    type: prometheus_remote_write
+    inputs:
+      - vector_agent_metrics
+    endpoint: http://victoriametrics:8428/api/v1/write
+    healthcheck:
+      enabled: false
