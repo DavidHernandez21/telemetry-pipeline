@@ -1,0 +1,62 @@
+apiVersion: 1
+
+datasources:
+
+  - name: prometheus
+    type: prometheus
+    access: proxy
+    orgId: 1
+    url: http://victoriametrics:8428
+    editable: true
+    isDefault: true
+
+
+
+    # <string, required> name of the datasource. Required
+  - name: openobserve
+    # <string, required> datasource type. Required
+    type: prometheus
+  #  type: OpenObserve
+    # <string, required> access mode. direct or proxy. Required
+    access: proxy
+    # <int> org id. will default to orgId 1 if not specified
+    orgId: 1
+
+  #  uid: "fdprvgcftryf4f"
+    # <string> url
+    # url: http://prometheus:9090
+  #  url: http://victoriametrics:8428
+    url: http://openobserve:5080/openobserve/api/dajetutta/prometheus
+    # <string> database password, if used
+  #  password: Complexpass#123
+    # <string> database user, if used
+  #  user: root@example.com
+    # <string> database name, if used
+    # database:
+    # <bool> enable/disable basic auth
+    basicAuth: true
+  #  <string> basic auth username
+    basicAuthUser: root@example.com
+  #  <string> basic auth password
+  #  basicAuthPassword: ${ZO_ROOT_USER_PASSWORD}
+    # <bool> enable/disable with credentials headers
+    # withCredentials:
+    # <bool> mark as default datasource. Max one per org
+    isDefault: false
+    # <map> fields that will be converted to json and stored in json_data
+    # jsonData:
+    #    graphiteVersion: "1.1"
+    #    tlsAuth: true
+    #    tlsAuthWithCACert: true
+    #    httpHeaderName1: "Authorization"
+    # <string> json object of data that will be encrypted.
+    secureJsonData:
+      # password: ${ZO_ROOT_USER_PASSWORD}
+      basicAuthPassword: ${ZO_ROOT_USER_PASSWORD}
+    #   tlsCACert: "..."
+    #   tlsClientCert: "..."
+    #   tlsClientKey: "..."
+    #   httpHeaderValue1: "Bearer xf5yhfkpsnmgo"
+    version: 1
+    # <bool> allow users to edit datasources from the UI.
+    editable: true
