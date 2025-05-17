@@ -1,0 +1,12 @@
+# Ignore all .env files (e.g., .env, something.env)
+*.env
+.env.*
+
+# Ignore certificate private keys (all .pem files)
+*.pem
+
+# ignore private keys
+*.key
+
+# Ignore all logs directories
+logs/
