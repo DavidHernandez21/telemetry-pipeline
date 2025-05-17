@@ -11,11 +11,11 @@ repos:
     -   id: name-tests-test
     -   id: requirements-txt-fixer
     -   id: detect-private-key
--   repo: https://github.com/asottile/add-trailing-comma
-    rev: v3.1.0
-    hooks:
-    -   id: add-trailing-comma
-        args: [--py36-plus]
+# -   repo: https://github.com/asottile/add-trailing-comma
+#     rev: v3.1.0
+#     hooks:
+#     -   id: add-trailing-comma
+#         args: [--py36-plus]
 -   repo: https://github.com/zricethezav/gitleaks
     rev: v8.26.0
     hooks:
