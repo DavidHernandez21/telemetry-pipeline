@@ -50,11 +50,11 @@ go to [https://localhost:8082/rabbitmq](https://localhost:8082/rabbitmq) and log
 
 ### examine vector events as they come
 
-[dosc](https://vector.dev/guides/level-up/vector-tap-guide/)
+[docs](https://vector.dev/guides/level-up/vector-tap-guide/)
 
 vector [api](https://vector.dev/docs/reference/api/) must be enabled
 
-``ỳaml
+```yaml
 api:
   enabled: true
   address: 0.0.0.0:8686
